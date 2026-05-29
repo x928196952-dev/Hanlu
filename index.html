@@ -731,13 +731,51 @@ footer {
   }
 
   // Email signup
-  function handleSignup(e) {
+function handleSignup(e) {
     e.preventDefault();
-    const email = e.target.querySelector('input[type=email]').value;
+    const form = e.target;
+    const emailInput = form.querySelector('input[type=email]');
+    const email = emailInput.value.trim();
     if (!email) return;
-    e.target.querySelector('input').value = '';
-    showToast('🎉 You\'re on the list! Check your inbox.');
-    // 真实部署时替换为 Mailchimp / ConvertKit API
+
+    const BASE = 'https://github.us6.list-manage.com/subscribe/post-json';
+    const callbackName = 'mc_cb_' + Date.now();
+
+    const params = new URLSearchParams({
+      u: '7c01bfb741c37e7b2d499be42',
+      id: '2125ab7059',
+      f_id: '00fc35e1f0',
+      EMAIL: email,
+      b_7c01bfb741c37e7b2d499be42_2125ab7059: '',
+      c: callbackName
+    });
+
+    const script = document.createElement('script');
+
+    window[callbackName] = function(data) {
+      delete window[callbackName];
+      if (document.body.contains(script)) document.body.removeChild(script);
+      if (data.result === 'success') {
+        emailInput.value = '';
+        showToast('🎉 You\'re on the list! Check your inbox.');
+      } else {
+        const msg = (data.msg || '').replace(/<[^>]*>/g, '');
+        if (msg.toLowerCase().includes('already subscribed')) {
+          showToast('✉️ You\'re already on the list — stay tuned!');
+        } else {
+          showToast('⚠️ ' + msg.substring(0, 80));
+        }
+      }
+    };
+
+    script.onerror = function() {
+      delete window[callbackName];
+      if (document.body.contains(script)) document.body.removeChild(script);
+      showToast('⚠️ Something went wrong. Please try again.');
+    };
+
+    script.src = BASE + '?' + params.toString();
+    document.body.appendChild(script);
   }
 
   function handleContact() {
