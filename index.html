@@ -757,11 +757,11 @@ function handleSignup(e) {
       if (document.body.contains(script)) document.body.removeChild(script);
       if (data.result === 'success') {
         emailInput.value = '';
-        showToast('🎉 You\'re on the list! Check your inbox.');
+        showToast("🎉 You\'re on the list! Check your inbox.');
       } else {
         const msg = (data.msg || '').replace(/<[^>]*>/g, '');
         if (msg.toLowerCase().includes('already subscribed')) {
-          showToast('✉️ You\'re already on the list — stay tuned!');
+          showToast('✉️ You\'re already on the list — stay tuned!");
         } else {
           showToast('⚠️ ' + msg.substring(0, 80));
         }
